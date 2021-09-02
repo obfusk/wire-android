@@ -58,6 +58,7 @@ def versions = [
 
 repositories {
     maven { url "https://oss.sonatype.org/content/repositories/releases" }
+    mavenLocal()
 }
 
 dependencies {
