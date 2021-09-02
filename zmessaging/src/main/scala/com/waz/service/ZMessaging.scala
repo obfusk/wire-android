@@ -134,7 +134,7 @@ class ZMessaging(val teamId: Option[TeamId], val clientId: ClientId, account: Ac
   def context           = global.context
   def accountStorage    = global.accountsStorage
   def contextWrapper    = new AndroidContext(context)
-  def googleApi         = global.googleApi
+  // def googleApi         = global.googleApi
   def globalToken       = global.tokenService
   def permissions       = global.permissions
   def phoneNumbers      = global.phoneNumbers
@@ -379,7 +379,7 @@ object ZMessaging extends DerivedLogTag { self =>
   private[waz] var context: Context = _
 
   private var prefs:               GlobalPreferences = _
-  private var googleApi:           GoogleApi = _
+  // private var googleApi:           GoogleApi = _
   private var backend:             BackendConfig = _
   private var syncRequests:        SyncRequestService = _
   private var notificationsUi:     NotificationUiController = _
@@ -391,7 +391,7 @@ object ZMessaging extends DerivedLogTag { self =>
   var clock = Clock.systemUTC()
 
   private lazy val _global: GlobalModule = new GlobalModuleImpl(
-    context, backend, prefs, googleApi, syncRequests, notificationsUi, fileRestrictionList, defaultProxyDetails
+    context, backend, prefs, /*googleApi,*/ syncRequests, notificationsUi, fileRestrictionList, defaultProxyDetails
   )
   private lazy val ui: UiModule = new UiModule(_global)
 
@@ -412,7 +412,7 @@ object ZMessaging extends DerivedLogTag { self =>
   def onCreate(context:             Context,
                beConfig:            BackendConfig,
                prefs:               GlobalPreferences,
-               googleApi:           GoogleApi,
+               // googleApi:           GoogleApi,
                syncRequests:        SyncRequestService,
                notificationUi:      NotificationUiController,
                assets2:             Assets2Module,
@@ -425,7 +425,7 @@ object ZMessaging extends DerivedLogTag { self =>
       this.context = context.getApplicationContext
       this.backend = beConfig
       this.prefs = prefs
-      this.googleApi = googleApi
+      // this.googleApi = googleApi
       this.syncRequests = syncRequests
       this.notificationsUi = notificationUi
       this.assets2Module = assets2

@@ -91,9 +91,6 @@ android {
         buildConfigField 'boolean', 'ACCOUNT_CREATION_ENABLED',      "$buildtimeConfiguration.configuration.allow_account_creation"
         buildConfigField 'boolean', 'ALLOW_SSO',                     "$buildtimeConfiguration.configuration.allowSSO"
         buildConfigField 'String',  'SUPPORT_EMAIL',                 "\"$buildtimeConfiguration.configuration.supportEmail\""
-        buildConfigField 'String',  'FIREBASE_PUSH_SENDER_ID',       "\"$buildtimeConfiguration.configuration.firebasePushSenderId\""
-        buildConfigField 'String',  'FIREBASE_APP_ID',               "\"$buildtimeConfiguration.configuration.firebaseAppId\""
-        buildConfigField 'String',  'FIREBASE_API_KEY',              "\"$buildtimeConfiguration.configuration.firebaseApiKey\""
         buildConfigField 'boolean', 'ENABLE_BLACKLIST',              "$buildtimeConfiguration.configuration.enableBlacklist"
         buildConfigField 'String',  'BLACKLIST_HOST',                "\"$buildtimeConfiguration.configuration.blacklistHost\""
         buildConfigField 'String',  'CERTIFICATE_PIN_DOMAIN',        "\"$buildtimeConfiguration.configuration.certificatePin.domain\""
@@ -357,18 +354,6 @@ dependencies {
     }
 
     implementation BuildDependencies.androidX.viewPager2
-
-    // Play services
-    implementation BuildDependencies.playServices.base
-    implementation BuildDependencies.playServices.maps
-    implementation BuildDependencies.playServices.location
-    implementation BuildDependencies.playServices.gcm
-
-    // Firebase
-    implementation (BuildDependencies.fireBaseMessaging) {
-        exclude group: 'com.google.firebase', module: 'firebase-analytics'
-        exclude group: 'com.google.firebase', module: 'firebase-measurement-connector'
-    }
 
     //Glide
     implementation(BuildDependencies.glide.core){

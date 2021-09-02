@@ -47,7 +47,7 @@ import com.waz.service.messages.MessagesService
 import com.waz.service.teams.{FeatureConfigsService, TeamsService}
 import com.waz.service.tracking.TrackingService
 import com.waz.services.fcm.FetchJob
-import com.waz.services.gps.GoogleApiImpl
+// import com.waz.services.gps.GoogleApiImpl
 import com.waz.services.websocket.{WebSocketController, WebSocketService}
 import com.waz.sync.client.CustomBackendClient
 import com.waz.sync.{SyncHandler, SyncRequestService}
@@ -412,7 +412,7 @@ class WireApplication extends MultiDexApplication with WireContext with Injectab
     })
 
     val prefs = GlobalPreferences(this)
-    val googleApi = GoogleApiImpl(this, backend, prefs)
+    // val googleApi = GoogleApiImpl(this, backend, prefs)
 
     val assets2Module = new Assets2Module {
       override def uriHelper: UriHelper = inject[UriHelper]
@@ -426,7 +426,7 @@ class WireApplication extends MultiDexApplication with WireContext with Injectab
       this,
       backend,
       prefs,
-      googleApi,
+      // googleApi,
       null, //TODO: Use sync engine's version for now
       inject[MessageNotificationsController],
       assets2Module,
@@ -449,7 +449,7 @@ class WireApplication extends MultiDexApplication with WireContext with Injectab
     inject[ThemeController]
     inject[PreferencesController]
     Future(clearOldVideoFiles(getApplicationContext))(Threading.Background)
-    Future(checkForPlayServices(prefs, googleApi))(Threading.Background)
+    // Future(checkForPlayServices(prefs, googleApi))(Threading.Background)
 
     inject[SecurityPolicyChecker]
     inject[LegalHoldStatusChangeListener]
@@ -475,6 +475,7 @@ class WireApplication extends MultiDexApplication with WireContext with Injectab
       )
     } else None
 
+  /*
   private def checkForPlayServices(prefs: GlobalPreferences, googleApi: GoogleApi): Unit =
     prefs(GlobalPreferences.CheckedForPlayServices).apply().foreach {
       case false =>
@@ -488,6 +489,7 @@ class WireApplication extends MultiDexApplication with WireContext with Injectab
         }
       case true => updateWebSocketForBuildConfig(prefs)
     }
+  */
 
   private def updateWebSocketForBuildConfig(prefs: GlobalPreferences): Future[Unit] =
     for {

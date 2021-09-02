@@ -63,7 +63,7 @@ trait GlobalModule {
   def accountsService:          AccountsService
   def calling:                  GlobalCallingService
   def prefs:                    GlobalPreferences
-  def googleApi:                GoogleApi
+  // def googleApi:                GoogleApi
   def storage:                  Database
   def metadata:                 MetaDataService
   def cache:                    CacheService
@@ -107,7 +107,7 @@ trait GlobalModule {
 class GlobalModuleImpl(val context:             AContext,
                        val backend:             BackendConfig,
                        val prefs:               GlobalPreferences,
-                       val googleApi:           GoogleApi,
+                       // val googleApi:           GoogleApi,
                        val syncRequests:        SyncRequestService,
                        val notificationsUi:     NotificationUiController,
                        val fileRestrictionList: FileRestrictionList,
@@ -193,7 +193,7 @@ class EmptyGlobalModule extends GlobalModule {
   override def notificationsUi:          NotificationUiController                            = ???
   override def calling:                  GlobalCallingService                                = ???
   override def prefs:                    GlobalPreferences                                   = ???
-  override def googleApi:                GoogleApi                                           = ???
+  // override def googleApi:                GoogleApi                                           = ???
   override def storage:                  Database                                            = ???
   override def metadata:                 MetaDataService                                     = ???
   override def cache:                    CacheService                                        = ???
