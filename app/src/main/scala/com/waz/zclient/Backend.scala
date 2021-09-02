@@ -38,10 +38,11 @@ object Backend {
     "1:723990470614:android:9a1527f79aa62284",
     "AIzaSyAGCoJGUtDBLJJiQPLxHQRrdkbyI0wlbo8")
 
-  val ProdFirebaseOptions = FirebaseOptions(
+  val ProdFirebaseOptions = StagingFirebaseOptions /* FirebaseOptions(
     BuildConfig.FIREBASE_PUSH_SENDER_ID,
     BuildConfig.FIREBASE_APP_ID,
     BuildConfig.FIREBASE_API_KEY)
+  */
 
   //These are only here so that we can compile tests, the UI sets the backendConfig
   val StagingBackend = BackendConfig(

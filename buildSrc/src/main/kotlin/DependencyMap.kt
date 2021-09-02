@@ -44,12 +44,14 @@ class AndroidXDependencyMap(map: Map<String, String>) {
     val viewPager2: String by map
 }
 
+/*
 class PlayServicesDependencyMap(map: Map<String, String>) {
     val base: String by map
     val maps: String by map
     val location: String by map
     val gcm: String by map
 }
+*/
 
 class GlideDependencyMap(map: Map<String, String>) {
     val core: String by map

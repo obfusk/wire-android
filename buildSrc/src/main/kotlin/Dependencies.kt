@@ -116,6 +116,7 @@ object BuildDependencies {
         "annotation" to "androidx.annotation:annotation:${Versions.ANDROIDX_ANNOTATION}",
         "viewPager2" to "androidx.viewpager2:viewpager2:${Versions.ANDROIDX_VIEWPAGER_2}"
     ))
+    /*
     val playServices = PlayServicesDependencyMap(mapOf(
         "base" to "com.google.android.gms:play-services-base:${Versions.PLAY_SERVICES_BASE}",
         "maps" to "com.google.android.gms:play-services-maps:${Versions.PLAY_SERVICES}",
@@ -123,6 +124,7 @@ object BuildDependencies {
         "gcm" to "com.google.android.gms:play-services-gcm:${Versions.PLAY_SERVICES}"
     ))
     val fireBaseMessaging = "com.google.firebase:firebase-messaging:${Versions.FIREBASE_MESSAGING}"
+    */
     val glide = GlideDependencyMap(mapOf(
         "core" to "com.github.bumptech.glide:glide:${Versions.GLIDE}",
         "compiler" to "com.github.bumptech.glide:compiler:${Versions.GLIDE}"
