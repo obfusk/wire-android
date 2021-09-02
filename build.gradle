@@ -2,10 +2,10 @@
 
 buildscript {
     repositories {
+        mavenLocal() // FIXME
         google()
         mavenCentral()
         jcenter() // FIXME
-        mavenLocal() // FIXME
     }
     dependencies {
         classpath "com.android.tools.build:gradle:${Versions.ANDROID_GRADLE_PLUGIN}"
@@ -26,10 +26,10 @@ plugins {
 
 allprojects {
     repositories {
+        mavenLocal() // FIXME
         google()
         mavenCentral()
         jcenter() // FIXME
-        mavenLocal() // FIXME
     }
 }
 
