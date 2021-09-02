@@ -2,7 +2,7 @@
 # FIXME: replace with properly published artefacts!
 set -xe
 wget -O artefacts.zip -- https://github.com/obfusk/wire-android/releases/download/foss-wip-artefacts/artefacts.zip
-printf '0f4e913939d4ed4f7243eb38ddb9293091beccbd223693e3b38f58280eaa24032ffc47c89d88f4c630c4bc367c7ad6d0c2c103b793539453a285496d693de17c  artefacts.zip\n' | sha512sum -c
+printf '3345eeabf0ab4784cb46195957e1b778700e66c5b47de0ad8484ef3c426f913ee1425672fa0c8712755f03b6a58ed21715c6f3293708afae75a4751b5418543a  artefacts.zip\n' | sha512sum -c
 unzip artefacts.zip
 cd artefacts
 for artefact in *.aar *.jar; do

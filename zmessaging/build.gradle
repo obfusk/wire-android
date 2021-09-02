@@ -57,10 +57,11 @@ def versions = [
 ]
 
 repositories {
+    // NB: com.wire:cryptobox-android:1.1.2 on mavenCentral() is broken
+    mavenLocal() // FIXME
     google()
     mavenCentral()
     jcenter() // FIXME
-    mavenLocal() // FIXME
 }
 
 dependencies {
