@@ -3,7 +3,8 @@ plugins {
 }
 
 repositories {
-    mavenCentral()
     google()
-    mavenLocal()
+    mavenCentral()
+    jcenter() // FIXME
+    mavenLocal() // FIXME
 }

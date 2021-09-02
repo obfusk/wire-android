@@ -3,7 +3,10 @@ import groovy.json.JsonSlurper
 
 buildscript {
     repositories {
+        google()
         mavenCentral()
+        jcenter() // FIXME
+        mavenLocal() // FIXME
     }
 }
 
