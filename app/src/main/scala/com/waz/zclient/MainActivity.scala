@@ -308,7 +308,7 @@ class MainActivity extends BaseActivity
 
   override protected def onResume(): Unit = {
     super.onResume()
-    Option(ZMessaging.currentGlobal).foreach(_.googleApi.checkGooglePlayServicesAvailable(this))
+    // Option(ZMessaging.currentGlobal).foreach(_.googleApi.checkGooglePlayServicesAvailable(this))
   }
 
 
@@ -453,7 +453,7 @@ class MainActivity extends BaseActivity
 
   override protected def onActivityResult(requestCode: Int, resultCode: Int, data: Intent): Unit = {
     super.onActivityResult(requestCode, resultCode, data)
-    Option(ZMessaging.currentGlobal).foreach(_.googleApi.onActivityResult(requestCode, resultCode))
+    // Option(ZMessaging.currentGlobal).foreach(_.googleApi.onActivityResult(requestCode, resultCode))
     Option(getSupportFragmentManager.findFragmentById(R.id.fl_main_content)).foreach(_.onActivityResult(requestCode, resultCode, data))
 
     if (requestCode == PreferencesActivity.SwitchAccountCode && data != null) {

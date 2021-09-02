@@ -53,7 +53,7 @@ import com.waz.sync.client.CustomBackendClient
 import com.waz.sync.{SyncHandler, SyncRequestService}
 import com.waz.threading.Threading
 import com.waz.utils.{SafeBase64, returning}
-import com.waz.utils.wrappers.GoogleApi
+// import com.waz.utils.wrappers.GoogleApi
 import com.waz.zclient.appentry.controllers.{CreateTeamController, InvitationsController}
 import com.waz.zclient.assets.{AndroidUriHelper, AssetDetailsServiceImpl, AssetPreviewServiceImpl}
 import com.waz.zclient.calling.controllers.{CallController, CallStartController}
@@ -137,7 +137,7 @@ object WireApplication extends DerivedLogTag {
     bind [AccountStorage]                 to inject[GlobalModule].accountsStorage
     bind [TeamsStorage]                   to inject[GlobalModule].teamsStorage
     bind [SSOService]                     to inject[GlobalModule].ssoService
-    bind [GoogleApi]                      to inject[GlobalModule].googleApi
+    // bind [GoogleApi]                      to inject[GlobalModule].googleApi
     bind [GlobalCallingService]           to inject[GlobalModule].calling
     bind [SyncHandler]                    to inject[GlobalModule].syncHandler
     bind [Clock]                          to ZMessaging.clock

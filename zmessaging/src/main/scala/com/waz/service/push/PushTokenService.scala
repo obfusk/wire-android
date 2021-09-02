@@ -125,7 +125,7 @@ trait GlobalTokenService {
   def setNewToken(): Future[Unit]
 }
 
-class GlobalTokenServiceImpl(googleApi: GoogleApi,
+class GlobalTokenServiceImpl(/* googleApi: GoogleApi, */
                              prefs:     GlobalPreferences,
                              network:   NetworkModeService) extends GlobalTokenService with DerivedLogTag {
   import PushTokenService._
@@ -140,10 +140,10 @@ class GlobalTokenServiceImpl(googleApi: GoogleApi,
   private var deletingToken = Future.successful({})
 
   for {
-    play    <- googleApi.isGooglePlayServicesAvailable
+    // play    <- googleApi.isGooglePlayServicesAvailable
     current <- _currentToken.signal
     network <- network.networkMode
-  } if (play && current.isEmpty && network != NetworkMode.OFFLINE) setNewToken()
+  } if (false && current.isEmpty && network != NetworkMode.OFFLINE) setNewToken()
 
   //Specify empty to force remove all tokens, or else only remove if `toRemove` contains the current token.
   override def resetGlobalToken(toRemove: Vector[PushToken] = Vector.empty) = {
@@ -152,7 +152,7 @@ class GlobalTokenServiceImpl(googleApi: GoogleApi,
         if (deletingToken.isCompleted) {
           deletingToken = for {
             _ <- retry({
-              googleApi.deleteAllPushTokens()
+              // googleApi.deleteAllPushTokens()
             })
             _ <- _currentToken := None
           } yield {}
@@ -163,12 +163,14 @@ class GlobalTokenServiceImpl(googleApi: GoogleApi,
   }
 
   override def setNewToken() = {
+    /*
     if (settingToken.isCompleted) {
       settingToken = for {
         t <- retry(returning(googleApi.getPushToken)(t => verbose(l"Setting new push token: $t")))
         _ <- _currentToken := Some(t)
       } yield {}
     }
+    */
     settingToken
   }
 
