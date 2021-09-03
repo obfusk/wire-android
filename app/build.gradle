@@ -467,6 +467,7 @@ def buildSuffixForVersion(String versionString) {
 }
 
 //add pretty naming to apk filename
+/*
 android.applicationVariants.all { variant ->
     def appName
     //Check if an applicationName property is supplied; if not use the name of the parent project.
@@ -486,4 +487,4 @@ android.applicationVariants.all { variant ->
         output.outputFileName = new File("../..", newApkName)
     }
 }
-
+*/
