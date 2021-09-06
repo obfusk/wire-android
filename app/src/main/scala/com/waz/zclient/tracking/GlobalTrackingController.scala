@@ -21,9 +21,9 @@ package com.waz.zclient.tracking
 import java.util
 
 import android.app.Activity
-import com.waz.content.UserPreferences.CurrentTrackingId
+// import com.waz.content.UserPreferences.CurrentTrackingId
 import com.waz.log.BasicLogging.LogTag.DerivedLogTag
-import com.waz.log.LogsService
+// import com.waz.log.LogsService
 import com.waz.model.{TeamId, TrackingId}
 import com.waz.service.tracking._
 import com.waz.service.{AccountManager, AccountsService, ZMessaging}
@@ -32,9 +32,9 @@ import com.waz.zclient._
 import com.waz.zclient.common.controllers.UserAccountsController
 import com.waz.zclient.log.LogUI._
 import com.wire.signals.Signal
-import ly.count.android.sdk.{Countly, CountlyConfig, DeviceId}
+// import ly.count.android.sdk.{Countly, CountlyConfig, DeviceId}
 
-import scala.collection.JavaConverters._
+// import scala.collection.JavaConverters._
 import scala.concurrent.Future
 
 class GlobalTrackingController(implicit inj: Injector, cxt: WireContext)
@@ -53,8 +53,9 @@ class GlobalTrackingController(implicit inj: Injector, cxt: WireContext)
     accountsService.activeAccount.foreach(_.foreach(user => tracking.appOpen(user.id)))
   }
 
-  tracking.onTrackingIdChange.foreach(setTrackingId)
+  // tracking.onTrackingIdChange.foreach(setTrackingId)
 
+  /*
   private def setTrackingId(id: TrackingId): Future[Unit] =
     for {
       am            <- am.head
@@ -65,17 +66,18 @@ class GlobalTrackingController(implicit inj: Injector, cxt: WireContext)
       _             =  if (inited && isNew) Countly.sharedInstance().changeDeviceIdWithMerge(id.str)
       _             =  verbose(l"tracking id set to $id (new: $isNew)")
     } yield ()
+  */
 
   def setAndSendNewTrackingId(): Future[TrackingId] =
     for {
       Some(z)    <- accountsService.activeZms.head
       trackingId =  TrackingId()
       _          =  verbose(l"new tracking id: $trackingId")
-      _          <- setTrackingId(trackingId)
+      // _          <- setTrackingId(trackingId)
       _          <- z.sync.postTrackingId(trackingId)
     } yield trackingId
 
-  def init(): Future[Unit] = {
+  def init(): Future[Unit] = Future(()) /* {
     for {
       isProUser        <- userAccountsController.isProUser.head if (isProUser)
       ap               <- tracking.isTrackingEnabled.head if (ap)
@@ -94,21 +96,21 @@ class GlobalTrackingController(implicit inj: Injector, cxt: WireContext)
         setUserDataFields()
         initialized ! true
     }
-  }
+  } */
 
-  def start(cxt: Activity): Future[Unit] = for {
+  def start(cxt: Activity): Future[Unit] = Future(()) /* for {
     isProUser         <- userAccountsController.isProUser.head
     isTrackingEnabled <- tracking.isTrackingEnabled.head
   } yield {
     if (isProUser && isTrackingEnabled) Countly.sharedInstance().onStart(cxt)
-  }
+  } */
 
-  def stop(): Future[Unit] = for {
+  def stop(): Future[Unit] = Future(()) /* for {
     isProUser         <- userAccountsController.isProUser.head
     isTrackingEnabled <- tracking.isTrackingEnabled.head
   } yield {
     if (isProUser && isTrackingEnabled) Countly.sharedInstance().onStop()
-  }
+  } */
 
   def optIn(): Future[Unit] = {
     verbose(l"optIn")
@@ -147,8 +149,8 @@ class GlobalTrackingController(implicit inj: Injector, cxt: WireContext)
       customFields.put("team_team_id", teamId.toString)
       customFields.put("team_team_size", MathUtils.logRoundFactor6(teamSize).toString)
       customFields.put("team_user_type", userAccountType)
-      Countly.userData.setUserData(predefinedFields, customFields)
-      Countly.userData.save()
+      // Countly.userData.setUserData(predefinedFields, customFields)
+      // Countly.userData.save()
     }
   }
 
@@ -161,11 +163,12 @@ class GlobalTrackingController(implicit inj: Injector, cxt: WireContext)
 
   private def sendEvent(eventArg: TrackingEvent, zmsArg: Option[ZMessaging] = None) = {
     verbose(l"send countly event: $eventArg")
-    Countly.sharedInstance().events().recordEvent(eventArg.name, eventArg.segments.asJava)
+    // Countly.sharedInstance().events().recordEvent(eventArg.name, eventArg.segments.asJava)
   }
 }
 
 object GlobalTrackingController {
+  /*
   val internalCountlyAppKey = "18bfffddd3a2a89b6a70bbe6569cc041b17a52d2"
   val demoCountlyAppKey = "af153753b54e3e8365cd928d30f86b88c164a666"
 
@@ -174,5 +177,5 @@ object GlobalTrackingController {
     case "dev" => demoCountlyAppKey
     case _ => BuildConfig.COUNTLY_APP_KEY
   }
-
+  */
 }

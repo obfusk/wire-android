@@ -153,7 +153,7 @@ object BuildDependencies {
     val libPhoneNumber = "com.googlecode.libphonenumber:libphonenumber:${Versions.LIB_PHONE_NUMBER}"
     val pinEditText = "com.poovam:pin-edittext-field:${Versions.PIN_EDITTEXT}"
     val libSodium = "com.github.joshjdevl.libsodiumjni:libsodium-jni-aar:${Versions.LIB_SODIUM}"
-    val countly = "ly.count.android:sdk:${Versions.COUNTLY}"
+    // val countly = "ly.count.android:sdk:${Versions.COUNTLY}"
     val zooming = "com.wire.zoom:zoomlayout:${Versions.ZOOMING}"
     val wireSignals = "com.wire:wire-signals_${LegacyDependencies.SCALA_MAJOR_VERSION}:${LegacyDependencies.WIRE_SIGNALS}"
     val wireSignalsExtensions = "com.wire:wire-signals-extensions_${LegacyDependencies.SCALA_MAJOR_VERSION}:${LegacyDependencies.WIRE_SIGNALS_EXTENSIONS}"
