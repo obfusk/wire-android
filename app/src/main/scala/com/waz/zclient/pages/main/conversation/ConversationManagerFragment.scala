@@ -253,12 +253,12 @@ class ConversationManagerFragment extends FragmentHelper
   override def onCloseCamera(cameraContext: CameraContext): Unit =
     if (cameraContext == CameraContext.MESSAGE) hideFragment(CameraFragment.Tag)
 
-  override def onShowShareLocation(): Unit = {}
-    // showFragment(LocationFragment.newInstance, LocationFragment.TAG, Page.SHARE_LOCATION)
+  override def onShowShareLocation(): Unit =
+    showFragment(LocationFragment.newInstance, LocationFragment.TAG, Page.SHARE_LOCATION)
 
   override def onHideShareLocation(location: MessageContent.Location): Unit = {
     if (location != null) convController.sendMessage(location)
-    // hideFragment(LocationFragment.TAG)
+    hideFragment(LocationFragment.TAG)
   }
 
   private def openParticipantFragment(userId: UserId, request: Either[Option[String], ParticipantRequest]): Unit =

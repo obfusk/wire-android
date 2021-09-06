@@ -402,6 +402,8 @@ dependencies {
 
     implementation BuildDependencies.zooming
 
+    implementation BuildDependencies.osmdroid
+
     // Unit Tests
     testImplementation TestDependencies.jUnit
     testImplementation TestDependencies.mockito.core

@@ -70,6 +70,7 @@ object Versions {
     const val LIB_SODIUM = "2.0.2"
     const val COUNTLY = "20.04.2"
     const val ZOOMING = "1.1.0"
+    const val OSMDROID = "6.1.11"
 
     //testing
     const val JUNIT = "4.12"
@@ -157,6 +158,7 @@ object BuildDependencies {
     val zooming = "com.wire.zoom:zoomlayout:${Versions.ZOOMING}"
     val wireSignals = "com.wire:wire-signals_${LegacyDependencies.SCALA_MAJOR_VERSION}:${LegacyDependencies.WIRE_SIGNALS}"
     val wireSignalsExtensions = "com.wire:wire-signals-extensions_${LegacyDependencies.SCALA_MAJOR_VERSION}:${LegacyDependencies.WIRE_SIGNALS_EXTENSIONS}"
+    val osmdroid = "org.osmdroid:osmdroid-android:${Versions.OSMDROID}"
 }
 
 object ModuleDependencies {

@@ -32,6 +32,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
@@ -42,19 +43,6 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.waz.model.AccentColor;
 import com.waz.api.MessageContent;
 import com.waz.model.ConversationData;
@@ -77,6 +65,12 @@ import com.waz.zclient.ui.views.TouchRegisteringFrameLayout;
 import com.waz.zclient.utils.Callback;
 import com.waz.zclient.utils.StringUtils;
 import com.waz.zclient.utils.ViewUtils;
+import org.osmdroid.api.IGeoPoint;
+import org.osmdroid.api.IMapController;
+import org.osmdroid.config.Configuration;
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
+import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.MapView;
 
 import java.util.List;
 import java.util.Locale;
@@ -86,25 +80,18 @@ import scala.Option;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
 @SuppressLint("All")
-public class LocationFragment extends BaseFragment<LocationFragment.Container> implements com.google.android.gms.location.LocationListener,
-                                                                                          LocationListener,
+public class LocationFragment extends BaseFragment<LocationFragment.Container> implements LocationListener,
                                                                                           TouchRegisteringFrameLayout.TouchCallback,
-                                                                                          GoogleMap.OnCameraChangeListener,
-                                                                                          GoogleApiClient.ConnectionCallbacks,
-                                                                                          GoogleApiClient.OnConnectionFailedListener,
-                                                                                          OnMapReadyCallback,
                                                                                           OnBackPressedListener,
                                                                                           View.OnClickListener {
 
-    private static final int LOCATION_PERMISSION_REQUEST_ID = 532;
     private static final float DEFAULT_MAP_ZOOM_LEVEL = 15F;
     private static final float DEFAULT_MIMIMUM_CAMERA_MOVEMENT = 2F;
-    private static final int LOCATION_REQUEST_TIMEOUT_MS = 1500;
-    private static final String MAP_VIEW_SAVE_STATE = "mapViewSaveState";
+    // private static final int LOCATION_REQUEST_TIMEOUT_MS = 1500;
     public static final String TAG = "LocationFragment";
 
     private Toolbar toolbar;
-    private MapView mapView;
+    private MapView map;
     private View selectedLocationBackground;
     private GlyphTextView selectedLocationPin;
     private LinearLayout selectedLocationDetails;
@@ -115,48 +102,47 @@ public class LocationFragment extends BaseFragment<LocationFragment.Container> i
     private TextView toolbarTitle;
     private Bitmap marker;
 
-    private GoogleMap map;
     private LocationManager locationManager;
     private Location currentLocation;
-
-    private GoogleApiClient googleApiClient;
-    private LocationRequest locationRequest;
 
     private String currentLocationCountryName;
     private String currentLocationLocality;
     private String currentLocationSubLocality;
     private String currentLocationFirstAddressLine;
     private String currentLocationName;
-    private LatLng currentLatLng;
 
-    private boolean animateTocurrentLocation;
+    private boolean animateToCurrentLocation;
     private boolean zoom;
     private boolean animating;
     private boolean checkIfLocationServicesEnabled;
     private Handler mainHandler;
-    private Handler backgroundHandler;
+    // private Handler backgroundHandler;
     private HandlerThread handlerThread;
     private Geocoder geocoder;
 
     private int accentColor;
 
+    /*
     private final Runnable updateCurrentLocationBubbleRunnable = new Runnable() {
         @Override
         public void run() {
             if (getActivity() == null || getContainer() == null) {
                 return;
             }
-            updateCurrentLocationName((int) map.getCameraPosition().zoom);
+            updateCurrentLocationName((int) map.getZoomLevelDouble());
             setTextAddressBubble(currentLocationName);
         }
     };
+    */
 
+    /*
     private final Runnable retrieveCurrentLocationNameRunnable = new Runnable() {
         @Override
         public void run() {
             try {
-                final List<Address> addresses = geocoder.getFromLocation(currentLatLng.latitude,
-                                                                         currentLatLng.longitude,
+                IGeoPoint center = map.getMapCenter();
+                final List<Address> addresses = geocoder.getFromLocation(center.getLatitude(),
+                                                                         center.getLongitude(),
                                                                          1);
                 if (addresses != null && addresses.size() > 0) {
                     Address adr = addresses.get(0);
@@ -186,6 +172,7 @@ public class LocationFragment extends BaseFragment<LocationFragment.Container> i
             mainHandler.post(updateCurrentLocationBubbleRunnable);
         }
     };
+    */
 
     public static LocationFragment newInstance() {
         return new LocationFragment();
@@ -194,20 +181,14 @@ public class LocationFragment extends BaseFragment<LocationFragment.Container> i
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (isGooglePlayServicesAvailable()) {
-            googleApiClient = new GoogleApiClient.Builder(getContext())
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-            googleApiClient.connect();
-        } else {
-            locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        }
+        Context ctx = getActivity().getApplicationContext();
+        Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
+
+        locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         mainHandler = new Handler();
         handlerThread = new HandlerThread("Background handler");
         handlerThread.start();
-        backgroundHandler = new Handler(handlerThread.getLooper());
+        // backgroundHandler = new Handler(handlerThread.getLooper());
         geocoder = new Geocoder(getContext(), Locale.getDefault());
         zoom = true;
 
@@ -258,24 +239,10 @@ public class LocationFragment extends BaseFragment<LocationFragment.Container> i
 
         selectedLocationAddress = ViewUtils.getView(view, R.id.ttv__location_address);
 
-        final Bundle mapViewSavedInstanceState = savedInstanceState != null ? savedInstanceState.getBundle(MAP_VIEW_SAVE_STATE) : null;
-        mapView = ViewUtils.getView(view, R.id.mv_map);
-        mapView.onCreate(mapViewSavedInstanceState);
-        mapView.getMapAsync(this);
+        map = ViewUtils.getView(view, R.id.mv_map);
+        map.setTileSource(TileSourceFactory.MAPNIK);
 
         return view;
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        // Dirty hack to avoid crash in MapView
-        // See https://code.google.com/p/gmaps-api-issues/issues/detail?id=6237#c9
-        final Bundle mapViewSaveState = new Bundle(outState);
-        mapView.onSaveInstanceState(mapViewSaveState);
-        outState.putBundle(MAP_VIEW_SAVE_STATE, mapViewSaveState);
-
-        super.onSaveInstanceState(outState);
-        mapView.onSaveInstanceState(outState);
     }
 
     private final Callback callback = new Callback<ConversationController.ConversationChange>() {
@@ -313,7 +280,7 @@ public class LocationFragment extends BaseFragment<LocationFragment.Container> i
     @Override
     public void onResume() {
         super.onResume();
-        mapView.onResume();
+        map.onResume();
 
         inject(ConversationController.class).withCurrentConvName(new Callback<String>() {
             @Override
@@ -327,9 +294,7 @@ public class LocationFragment extends BaseFragment<LocationFragment.Container> i
             Toast.makeText(getContext(), R.string.location_sharing__tip, Toast.LENGTH_LONG).show();
         }
         if (hasLocationPermission()) {
-            if (googleApiClient != null) {
-                googleApiClient.connect();
-            } else if (locationManager != null) {
+            if (locationManager != null) {
                 startLocationManagerListeningForCurrentLocation();
             }
         }
@@ -338,30 +303,14 @@ public class LocationFragment extends BaseFragment<LocationFragment.Container> i
     @Override
     public void onPause() {
         stopLocationManagerListeningForCurrentLocation();
-        stopPlayServicesListeningForCurrentLocation();
-        if (googleApiClient != null) {
-            googleApiClient.disconnect();
-        }
         super.onPause();
-        mapView.onPause();
+        map.onPause();
     }
 
     @Override
     public void onStop() {
         inject(ConversationController.class).removeConvChangedCallback(callback);
         super.onStop();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mapView.onDestroy();
-    }
-
-    @Override
-    public void onLowMemory() {
-        super.onLowMemory();
-        mapView.onLowMemory();
     }
 
     @Override
@@ -379,11 +328,6 @@ public class LocationFragment extends BaseFragment<LocationFragment.Container> i
 
     }
 
-    private boolean isGooglePlayServicesAvailable() {
-        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
-        return ConnectionResult.SUCCESS == apiAvailability.isGooglePlayServicesAvailable(getContext());
-    }
-
     @SuppressWarnings("ResourceType")
     @SuppressLint("MissingPermission")
     private void startLocationManagerListeningForCurrentLocation() {
@@ -393,18 +337,6 @@ public class LocationFragment extends BaseFragment<LocationFragment.Container> i
         }
     }
 
-    private void startPlayServicesListeningForCurrentLocation() {
-        Logger.info(TAG,"startPlayServicesListeningForCurrentLocation");
-        if (locationRequest != null) {
-            return;
-        }
-        locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setInterval(1000);
-        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
-        currentLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-    }
-
     @SuppressWarnings("ResourceType")
     @SuppressLint("MissingPermission")
     private void stopLocationManagerListeningForCurrentLocation() {
@@ -412,15 +344,6 @@ public class LocationFragment extends BaseFragment<LocationFragment.Container> i
         if (locationManager != null && hasLocationPermission()) {
             locationManager.removeUpdates(this);
         }
-    }
-
-    private void stopPlayServicesListeningForCurrentLocation() {
-        Logger.info(TAG,"stopPlayServicesListeningForCurrentLocation");
-        if (locationRequest == null) {
-            return;
-        }
-        LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
-        locationRequest = null;
     }
 
     private boolean isLocationServicesEnabled() {
@@ -465,6 +388,7 @@ public class LocationFragment extends BaseFragment<LocationFragment.Container> i
                                   null);
     }
 
+    /*
     private void updateCurrentLocationName(int zoom) {
         if (zoom >= 12) {
             // Local address
@@ -491,17 +415,18 @@ public class LocationFragment extends BaseFragment<LocationFragment.Container> i
             currentLocationName = currentLocationCountryName;
         }
     }
+    */
 
     @Override
     public void onInterceptTouchEvent(MotionEvent event) {
-        animateTocurrentLocation = false;
+        animateToCurrentLocation = false;
     }
 
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.gtv__location__current__button:
-                animateTocurrentLocation = true;
+                animateToCurrentLocation = true;
                 zoom = true;
                 if (hasLocationPermission()) {
                     updateLastKnownLocation();
@@ -511,16 +436,17 @@ public class LocationFragment extends BaseFragment<LocationFragment.Container> i
                 break;
             case R.id.ttv__location_send_button:
                 MessageContent.Location location;
-                if (currentLatLng == null) {
+                if (map == null) {
                     if (!BuildConfig.DEBUG) {
                         return;
                     }
                     location = new MessageContent.Location(0.0f, 0.0f, "", 0);
                 } else {
-                    location = new MessageContent.Location((float) currentLatLng.longitude,
-                        (float) currentLatLng.latitude,
+                    IGeoPoint center = map.getMapCenter();
+                    location = new MessageContent.Location((float) center.getLatitude(),
+                        (float) center.getLongitude(),
                         currentLocationName,
-                        (int) map.getCameraPosition().zoom);
+                        (int) map.getZoomLevelDouble());
                 }
 
                 getControllerFactory().getLocationController().hideShareLocation(location);
@@ -534,14 +460,13 @@ public class LocationFragment extends BaseFragment<LocationFragment.Container> i
     private void updateLastKnownLocation() {
         if (locationManager != null) {
             currentLocation = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
-        } else if (googleApiClient != null && locationRequest != null) {
-            currentLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
         }
         if (currentLocation != null) {
             onLocationChanged(currentLocation);
         }
     }
 
+    /*
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
         Logger.info(TAG,"onCameraChange");
@@ -558,7 +483,9 @@ public class LocationFragment extends BaseFragment<LocationFragment.Container> i
         backgroundHandler.removeCallbacksAndMessages(null);
         backgroundHandler.post(retrieveCurrentLocationNameRunnable);
     }
+    */
 
+    /*
     @Override
     public void onMapReady(GoogleMap googleMap) {
         Logger.info(TAG,"onMapReady");
@@ -576,17 +503,20 @@ public class LocationFragment extends BaseFragment<LocationFragment.Container> i
         }
         map.setOnCameraChangeListener(this);
     }
+    */
 
+    // FIXME
     @Override
     public void onLocationChanged(Location location) {
         Float distanceToCurrent = (currentLocation == null) ? 0 : location.distanceTo(currentLocation);
         Logger.info(TAG,"onLocationChanged, lat" + location.getLatitude() + ", lon=" + location.getLongitude() + ", accuracy=" + location.getAccuracy() + ", distanceToCurrent=" + distanceToCurrent);
 
         float distanceFromCenterOfScreen = Float.MAX_VALUE;
-        if (currentLatLng != null) {
+        if (map != null) {
+            IGeoPoint center = map.getMapCenter();
             float[] distance = new float[1];
-            Location.distanceBetween(currentLatLng.latitude,
-                                     currentLatLng.longitude,
+            Location.distanceBetween(center.getLatitude(),
+                                     center.getLongitude(),
                                      location.getLatitude(),
                                      location.getLongitude(),
                                      distance);
@@ -596,27 +526,29 @@ public class LocationFragment extends BaseFragment<LocationFragment.Container> i
 
         currentLocation = location;
         if (map != null) {
+            /*
             map.clear();
             LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
             map.addMarker(new MarkerOptions()
                               .position(position)
                               .icon(BitmapDescriptorFactory.fromBitmap(getMarker()))
                               .anchor(0.5f, 0.5f));
-            if (animateTocurrentLocation && distanceFromCenterOfScreen > DEFAULT_MIMIMUM_CAMERA_MOVEMENT) {
+            */
+            if (animateToCurrentLocation && distanceFromCenterOfScreen > DEFAULT_MIMIMUM_CAMERA_MOVEMENT) {
+                IMapController controller = map.getController();
                 if (zoom || animating) {
-                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(currentLocation.getLatitude(),
-                                                                                   currentLocation.getLongitude()),
-                                                                        DEFAULT_MAP_ZOOM_LEVEL));
+                    controller.setZoom(DEFAULT_MAP_ZOOM_LEVEL); // FIXME
+                    controller.animateTo(new GeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude()));
                     animating = true;
                     zoom = false;
                 } else {
-                    map.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(currentLocation.getLatitude(),
-                                                                               currentLocation.getLongitude())));
+                    controller.animateTo(new GeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude()));
                 }
             }
         }
     }
 
+    /*
     private void setTextAddressBubble(String name) {
         if (StringUtils.isBlank(name)) {
             selectedLocationDetails.setVisibility(View.INVISIBLE);
@@ -631,7 +563,9 @@ public class LocationFragment extends BaseFragment<LocationFragment.Container> i
             selectedLocationPin.setVisibility(View.INVISIBLE);
         }
     }
+    */
 
+    /*
     private Bitmap getMarker() {
         if (marker != null) {
             return marker;
@@ -657,6 +591,7 @@ public class LocationFragment extends BaseFragment<LocationFragment.Container> i
         marker = bitmap;
         return marker;
     }
+    */
 
     @Override
     public boolean onBackPressed() {
@@ -667,6 +602,7 @@ public class LocationFragment extends BaseFragment<LocationFragment.Container> i
         return true;
     }
 
+    /*
     @Override
     public void onConnected(Bundle bundle) {
         Logger.info(TAG,"onConnected");
@@ -678,13 +614,17 @@ public class LocationFragment extends BaseFragment<LocationFragment.Container> i
             requestLocationPermission();
         }
     }
+    */
 
+    /*
     @Override
     public void onConnectionSuspended(int i) {
         Logger.info(TAG,"onConnectionSuspended");
         // goodbye
     }
+    */
 
+    /*
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
         // fallback to LocationManager
@@ -699,6 +639,7 @@ public class LocationFragment extends BaseFragment<LocationFragment.Container> i
             requestLocationPermission();
         }
     }
+    */
 
     private boolean hasLocationPermission() {
         return inject(PermissionsService.class).checkPermission(ACCESS_FINE_LOCATION);
@@ -715,9 +656,7 @@ public class LocationFragment extends BaseFragment<LocationFragment.Container> i
                     requestCurrentLocationButton.setVisibility(View.VISIBLE);
                     zoom = true;
                     updateLastKnownLocation();
-                    if (googleApiClient != null && googleApiClient.isConnected()) {
-                        startPlayServicesListeningForCurrentLocation();
-                    } else if (locationManager != null) {
+                    if (locationManager != null) {
                         startLocationManagerListeningForCurrentLocation();
                     }
                     if (checkIfLocationServicesEnabled) {
