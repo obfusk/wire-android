@@ -198,6 +198,7 @@ class LocationFragment extends BaseFragment[LocationFragment.Container]
     map = ViewUtils.getView(view, R.id.mv_map)
     map.setTileSource(TileSourceFactory.MAPNIK)
     map.addMapListener(this)
+    map.getController.setZoom(INIT_MAP_ZOOM_LEVEL)
 
     view
   }
@@ -399,18 +400,10 @@ class LocationFragment extends BaseFragment[LocationFragment.Container]
     backgroundHandler.post(retrieveCurrentLocationNameRunnable)
   }
 
-  // FIXME
+  // FIXME: what's the expected behaviour?
   override def onLocationChanged(location: Location): Unit = {
     val distanceToCurrent = if (currentLocation == null) 0 else location.distanceTo(currentLocation)
     info(TAG, s"onLocationChanged, lat=${location.getLatitude}, lon=${location.getLongitude}, accuracy=${location.getAccuracy}, distanceToCurrent=$distanceToCurrent")
-    if (currentLocation != null && distanceToCurrent == 0) {
-      return
-    }
-    info(TAG, s"atcl=$animateToCurrentLocation") // FIXME
-    if (currentLocation == null) {
-      animateToCurrentLocation = true
-      info(TAG, "actl->true") // FIXME
-    }
     var distanceFromCenterOfScreen = Float.MaxValue
     if (map != null) {
       val center = map.getMapCenter
@@ -424,26 +417,30 @@ class LocationFragment extends BaseFragment[LocationFragment.Container]
       )
       distanceFromCenterOfScreen = distance(0)
       info(TAG, s"current location distance from map center: ${distance(0)}")
+
+      if (currentLocation == null || distanceToCurrent != 0) {
+        map.getOverlays.clear()
+        val m = new Marker(map)
+        m.setPosition(new GeoPoint(location.getLatitude, location.getLongitude))
+        m.setIcon(new BitmapDrawable(getResources, getMarker()))
+        m.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+        map.getOverlays.add(m)
+        map.invalidate()
+      }
+    }
+    if (currentLocation == null && !animateToCurrentLocation) {
+      info(TAG, "zooming in to current location")
+      map.getController.setZoom(DEFAULT_MAP_ZOOM_LEVEL)
+      animateToCurrentLocation = true
     }
     currentLocation = location
     if (map != null) {
-      // FIXME
-      map.getOverlays.clear()
-      val m = new Marker(map)
-      m.setPosition(new GeoPoint(location.getLatitude, location.getLongitude))
-      m.setIcon(new BitmapDrawable(getResources, getMarker()))
-      m.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-      map.getOverlays.add(m)
-      map.invalidate()
-
-      // FIXME
       if (animateToCurrentLocation && distanceFromCenterOfScreen > DEFAULT_MINIMUM_CAMERA_MOVEMENT) {
+        info(TAG, "moving to current location")
         val controller = map.getController
         val speed = Configuration.getInstance.getAnimationSpeedDefault
-        controller.animateTo(
-          new GeoPoint(currentLocation.getLatitude, currentLocation.getLongitude),
-          DEFAULT_MAP_ZOOM_LEVEL, speed
-        )
+        controller.animateTo(new GeoPoint(currentLocation.getLatitude, currentLocation.getLongitude))
+        animateToCurrentLocation = false
       }
     }
   }
@@ -548,8 +545,9 @@ object LocationFragment {
 
   val TAG = "LocationFragment"
 
+  private val INIT_MAP_ZOOM_LEVEL = 1.0
   private val DEFAULT_MAP_ZOOM_LEVEL = 15f // FIXME: are zoom levels compatible?
-  private val DEFAULT_MINIMUM_CAMERA_MOVEMENT = 2f
+  private val DEFAULT_MINIMUM_CAMERA_MOVEMENT = 5f // FIXME
   private val LOCATION_REQUEST_TIMEOUT_MS = 1500
 
   def newInstance(): LocationFragment = new LocationFragment()
