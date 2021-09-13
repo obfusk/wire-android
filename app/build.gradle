@@ -403,6 +403,9 @@ dependencies {
     implementation BuildDependencies.zooming
 
     implementation BuildDependencies.osmdroid
+    implementation(BuildDependencies.osmbonuspack) {
+        transitive = false
+    }
 
     // Unit Tests
     testImplementation TestDependencies.jUnit

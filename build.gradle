@@ -6,6 +6,7 @@ buildscript {
         google()
         mavenCentral()
         jcenter() // FIXME
+        maven { url "https://jitpack.io" }
     }
     dependencies {
         classpath "com.android.tools.build:gradle:${Versions.ANDROID_GRADLE_PLUGIN}"
@@ -30,6 +31,7 @@ allprojects {
         google()
         mavenCentral()
         jcenter() // FIXME
+        maven { url "https://jitpack.io" }
     }
 }
 

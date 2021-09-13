@@ -21,7 +21,7 @@ import android.Manifest
 import android.content.{Context, DialogInterface, Intent}
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.{Bitmap, Canvas, Paint}
-import android.location.{Geocoder, Location, LocationListener, LocationManager}
+import android.location.{Location, LocationListener, LocationManager}
 import android.os.{Bundle, Handler, HandlerThread, Looper}
 import android.provider.Settings
 import android.view.{LayoutInflater, MotionEvent, View, ViewGroup}
@@ -46,6 +46,7 @@ import com.waz.zclient.utils.{Callback, StringUtils, ViewUtils}
 import com.waz.zclient.{BaseActivity, BuildConfig, OnBackPressedListener, R}
 import com.wire.signals.EventContext
 
+import org.osmdroid.bonuspack.location.GeocoderNominatim
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.{MapListener, ScrollEvent, ZoomEvent}
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -83,11 +84,11 @@ class LocationFragment extends BaseFragment[LocationFragment.Container]
   private var touchRegisteringFrameLayout: TouchRegisteringFrameLayout = null
 
   private var backgroundHandler: Handler = null
-  private var geocoder: Geocoder = null
+  private var geocoder: GeocoderNominatim = null
   private var handlerThread: HandlerThread = null
   private var mainHandler: Handler = null
 
-  private var animateToCurrentLocation = false
+  private var animateToCurrentLocation: Option[Boolean] = None
   private var checkIfLocationServicesEnabled = false
   private var accentColor = 0
 
@@ -146,9 +147,7 @@ class LocationFragment extends BaseFragment[LocationFragment.Container]
     handlerThread = new HandlerThread("Background handler")
     handlerThread.start()
     backgroundHandler = new Handler(handlerThread.getLooper)
-    geocoder = new Geocoder(getContext, Locale.getDefault)
-
-    info(TAG, s"Geocoder present: ${Geocoder.isPresent}")
+    geocoder = new GeocoderNominatim(Locale.getDefault, getContext.getPackageName)
 
     // retrieve the accent color to be used for the paint
     accentColor = AccentColor.defaultColor.color
@@ -289,13 +288,13 @@ class LocationFragment extends BaseFragment[LocationFragment.Container]
     )
 
   override def onInterceptTouchEvent(event: MotionEvent): Unit = {
-    animateToCurrentLocation = false
+    animateToCurrentLocation = Some(false)
   }
 
   override def onClick(view: View): Unit =
     view.getId match {
       case R.id.gtv__location__current__button =>
-        animateToCurrentLocation = true
+        animateToCurrentLocation = Some(true)
         if (hasLocationPermission()) {
           updateLastKnownLocation()
         } else {
@@ -365,18 +364,18 @@ class LocationFragment extends BaseFragment[LocationFragment.Container]
         m.getOverlays.add(marker)
         m.invalidate()
       }
-      if (currentLocation.isEmpty && !animateToCurrentLocation) {
+      if (currentLocation.isEmpty && animateToCurrentLocation.isEmpty) {
         info(TAG, "zooming in to current location")
         m.getController.setZoom(DEFAULT_MAP_ZOOM_LEVEL)
-        animateToCurrentLocation = true
+        animateToCurrentLocation = Some(true)
       }
     }
     currentLocation = Some(location)
     map foreach { m =>
-      if (animateToCurrentLocation && distanceFromCenterOfScreen > DEFAULT_MINIMUM_CAMERA_MOVEMENT) {
+      if (animateToCurrentLocation.getOrElse(false) && distanceFromCenterOfScreen > DEFAULT_MINIMUM_CAMERA_MOVEMENT) {
         info(TAG, "moving to current location")
         m.getController.animateTo(new GeoPoint(location.getLatitude, location.getLongitude))
-        animateToCurrentLocation = false
+        animateToCurrentLocation = Some(false)
       }
     }
   }

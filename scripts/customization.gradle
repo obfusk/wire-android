@@ -7,6 +7,7 @@ buildscript {
         google()
         mavenCentral()
         jcenter() // FIXME
+        maven { url "https://jitpack.io" }
     }
 }
 
