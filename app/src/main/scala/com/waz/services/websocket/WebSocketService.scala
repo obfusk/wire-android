@@ -45,8 +45,9 @@ class WebSocketController(implicit inj: Injector) extends Injectable with Derive
   private lazy val cloudPushAvailable =
     for {
       gpsAvailable   <- global.googleApi.isGooglePlayServicesAvailable
+      upAvailable    <- global.unifiedPushApi.isUnifiedPushAvailable
       devPrefEnabled <- global.prefs(PushEnabledKey).signal
-    } yield gpsAvailable && devPrefEnabled
+    } yield (gpsAvailable || upAvailable) && devPrefEnabled
 
   lazy val accountWebsocketStates: Signal[(Set[WSPushService], Set[WSPushService])] =
     for {

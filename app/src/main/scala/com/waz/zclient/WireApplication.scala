@@ -48,12 +48,13 @@ import com.waz.service.teams.{FeatureConfigsService, TeamsService}
 import com.waz.service.tracking.TrackingService
 import com.waz.services.fcm.FetchJob
 import com.waz.services.gps.GoogleApiImpl
+import com.waz.services.unifiedpush.UnifiedPushApiImpl
 import com.waz.services.websocket.{WebSocketController, WebSocketService}
 import com.waz.sync.client.CustomBackendClient
 import com.waz.sync.{SyncHandler, SyncRequestService}
 import com.waz.threading.Threading
 import com.waz.utils.{SafeBase64, returning}
-import com.waz.utils.wrappers.GoogleApi
+import com.waz.utils.wrappers.{GoogleApi, UnifiedPushApi}
 import com.waz.zclient.appentry.controllers.{CreateTeamController, InvitationsController}
 import com.waz.zclient.assets.{AndroidUriHelper, AssetDetailsServiceImpl, AssetPreviewServiceImpl}
 import com.waz.zclient.calling.controllers.{CallController, CallStartController}
@@ -137,6 +138,7 @@ object WireApplication extends DerivedLogTag {
     bind [TeamsStorage]                   to inject[GlobalModule].teamsStorage
     bind [SSOService]                     to inject[GlobalModule].ssoService
     bind [GoogleApi]                      to inject[GlobalModule].googleApi
+    bind [UnifiedPushApi]                 to inject[GlobalModule].unifiedPushApi
     bind [GlobalCallingService]           to inject[GlobalModule].calling
     bind [SyncHandler]                    to inject[GlobalModule].syncHandler
     bind [Clock]                          to ZMessaging.clock
@@ -412,6 +414,7 @@ class WireApplication extends MultiDexApplication with WireContext with Injectab
 
     val prefs = GlobalPreferences(this)
     val googleApi = GoogleApiImpl(this, backend, prefs)
+    val unifiedPushApi = UnifiedPushApiImpl()
 
     val assets2Module = new Assets2Module {
       override def uriHelper: UriHelper = inject[UriHelper]
@@ -426,6 +429,7 @@ class WireApplication extends MultiDexApplication with WireContext with Injectab
       backend,
       prefs,
       googleApi,
+      unifiedPushApi,
       null, //TODO: Use sync engine's version for now
       inject[MessageNotificationsController],
       assets2Module,
@@ -448,7 +452,7 @@ class WireApplication extends MultiDexApplication with WireContext with Injectab
     inject[ThemeController]
     inject[PreferencesController]
     Future(clearOldVideoFiles(getApplicationContext))(Threading.Background)
-    Future(checkForPlayServices(prefs, googleApi))(Threading.Background)
+    Future(checkForUnifiedPush(prefs, googleApi, unifiedPushApi))(Threading.Background)
 
     inject[SecurityPolicyChecker]
     inject[LegalHoldStatusChangeListener]
@@ -473,6 +477,14 @@ class WireApplication extends MultiDexApplication with WireContext with Injectab
         }
       )
     } else None
+
+  private def checkForUnifiedPush(prefs: GlobalPreferences, googleApi: GoogleApi, unifiedPushApi: UnifiedPushApi): Unit =
+    unifiedPushApi.isUnifiedPushAvailable.foreach {
+      case true =>
+        verbose(l"UnifiedPush available")
+        updateWebSocketForBuildConfig(prefs)
+      case false => checkForPlayServices(prefs, googleApi)
+    }
 
   private def checkForPlayServices(prefs: GlobalPreferences, googleApi: GoogleApi): Unit =
     prefs(GlobalPreferences.CheckedForPlayServices).apply().foreach {

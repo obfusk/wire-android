@@ -39,7 +39,7 @@ import com.waz.sync.client._
 import com.waz.sync.{AccountSyncHandler, SyncHandler, SyncRequestService}
 import com.waz.threading.Threading
 import com.waz.ui.{MemoryImageCache, MemoryImageCacheImpl}
-import com.waz.utils.wrappers.{Context, GoogleApi}
+import com.waz.utils.wrappers.{Context, GoogleApi, UnifiedPushApi}
 import com.waz.utils.{Cache, IoUtils}
 import com.waz.zms.BuildConfig
 import com.waz.znet2.http.Request.UrlCreator
@@ -64,6 +64,7 @@ trait GlobalModule {
   def calling:                  GlobalCallingService
   def prefs:                    GlobalPreferences
   def googleApi:                GoogleApi
+  def unifiedPushApi:           UnifiedPushApi
   def storage:                  Database
   def metadata:                 MetaDataService
   def cache:                    CacheService
@@ -108,6 +109,7 @@ class GlobalModuleImpl(val context:             AContext,
                        val backend:             BackendConfig,
                        val prefs:               GlobalPreferences,
                        val googleApi:           GoogleApi,
+                       val unifiedPushApi:      UnifiedPushApi,
                        val syncRequests:        SyncRequestService,
                        val notificationsUi:     NotificationUiController,
                        val fileRestrictionList: FileRestrictionList,
@@ -194,6 +196,7 @@ class EmptyGlobalModule extends GlobalModule {
   override def calling:                  GlobalCallingService                                = ???
   override def prefs:                    GlobalPreferences                                   = ???
   override def googleApi:                GoogleApi                                           = ???
+  override def unifiedPushApi:           UnifiedPushApi                                      = ???
   override def storage:                  Database                                            = ???
   override def metadata:                 MetaDataService                                     = ???
   override def cache:                    CacheService                                        = ???

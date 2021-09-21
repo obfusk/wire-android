@@ -46,7 +46,7 @@ import com.waz.sync.queue.{SyncContentUpdater, SyncContentUpdaterImpl}
 import com.waz.threading.Threading
 import com.waz.ui.UiModule
 import com.waz.utils.crypto._
-import com.waz.utils.wrappers.{AndroidContext, DB, GoogleApi}
+import com.waz.utils.wrappers.{AndroidContext, DB, GoogleApi, UnifiedPushApi}
 import com.waz.utils.{IoUtils, Locales}
 import com.waz.zms.BuildConfig
 import com.waz.znet2.http.HttpClient
@@ -136,6 +136,7 @@ class ZMessaging(val teamId: Option[TeamId], val clientId: ClientId, account: Ac
   def accountStorage    = global.accountsStorage
   def contextWrapper    = new AndroidContext(context)
   def googleApi         = global.googleApi
+  def unifiedPushApi    = global.unifiedPushApi
   def globalToken       = global.tokenService
   def permissions       = global.permissions
   def phoneNumbers      = global.phoneNumbers
@@ -381,6 +382,7 @@ object ZMessaging extends DerivedLogTag { self =>
 
   private var prefs:               GlobalPreferences = _
   private var googleApi:           GoogleApi = _
+  private var unifiedPushApi:      UnifiedPushApi = _
   private var backend:             BackendConfig = _
   private var syncRequests:        SyncRequestService = _
   private var notificationsUi:     NotificationUiController = _
@@ -392,7 +394,7 @@ object ZMessaging extends DerivedLogTag { self =>
   var clock = Clock.systemUTC()
 
   private lazy val _global: GlobalModule = new GlobalModuleImpl(
-    context, backend, prefs, googleApi, syncRequests, notificationsUi, fileRestrictionList, defaultProxyDetails
+    context, backend, prefs, googleApi, unifiedPushApi, syncRequests, notificationsUi, fileRestrictionList, defaultProxyDetails
   )
   private lazy val ui: UiModule = new UiModule(_global)
 
@@ -414,6 +416,7 @@ object ZMessaging extends DerivedLogTag { self =>
                beConfig:            BackendConfig,
                prefs:               GlobalPreferences,
                googleApi:           GoogleApi,
+               unifiedPushApi:      UnifiedPushApi,
                syncRequests:        SyncRequestService,
                notificationUi:      NotificationUiController,
                assets2:             Assets2Module,
@@ -427,6 +430,7 @@ object ZMessaging extends DerivedLogTag { self =>
       this.backend = beConfig
       this.prefs = prefs
       this.googleApi = googleApi
+      this.unifiedPushApi = unifiedPushApi
       this.syncRequests = syncRequests
       this.notificationsUi = notificationUi
       this.assets2Module = assets2

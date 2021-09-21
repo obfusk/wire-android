@@ -1,6 +1,6 @@
 /**
  * Wire
- * Copyright (C) 2019 Wire Swiss GmbH
+ * Copyright (C) 2021 Wire Swiss GmbH
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-include ':app', ':common-test', ':custom-checkstyle', ':storage',
-    ':zmessaging', 'macrosupport', ':up-connector'
+package com.waz.services.unifiedpush
 
-rootProject.name = 'zclient-root'
+import android.content.Context
+import com.waz.utils.wrappers.UnifiedPushApi
+import com.wire.signals.Signal
+
+class UnifiedPushApiImpl extends UnifiedPushApi {
+  override val isUnifiedPushAvailable: Signal[Boolean] = Signal(false)
+  override def initUnifiedPush(context: Context): Unit = {}
+}
+
+object UnifiedPushApiImpl {
+  private val instance = new UnifiedPushApiImpl
+
+  def apply(): UnifiedPushApiImpl = instance
+}

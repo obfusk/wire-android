@@ -32,6 +32,7 @@ import com.waz.service.AccountManager.ClientRegistrationState.{LimitReached, Pas
 import com.waz.service.AccountsService.UserInitiated
 import com.waz.service.ZMessaging.clock
 import com.waz.service.{AccountManager, AccountsService, ZMessaging}
+import com.waz.services.unifiedpush.UnifiedPushApiImpl
 import com.waz.threading.Threading
 import com.waz.threading.Threading._
 import com.waz.utils.{RichInstant, returning}
@@ -185,6 +186,9 @@ class MainActivity extends BaseActivity
       case Hide(Some(message)) => loadingIndicator.hideWithMessage(message, 750)
       case Hide(_) => loadingIndicator.hide()
     }
+
+    // FIXME
+    UnifiedPushApiImpl().initUnifiedPush(this)
 
     deepLinkService.deepLink.onUi {
       case None =>

@@ -102,5 +102,4 @@ object GoogleApiImpl {
       case None => returning(new GoogleApiImpl(context, beConfig, prefs)){ api: GoogleApiImpl => instance = Some(api) }
     }
   }
-
 }

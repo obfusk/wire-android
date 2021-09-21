@@ -1,0 +1,17 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+    compileSdkVersion Versions.COMPILE_SDK_VERSION
+    buildToolsVersion Versions.BUILD_TOOLS_VERSION
+
+    defaultConfig {
+        minSdkVersion Versions.MIN_SDK_VERSION
+        targetSdkVersion Versions.TARGET_SDK_VERSION
+    }
+}
+
+dependencies {
+    implementation BuildDependencies.kotlin.standardLibrary
+    implementation BuildDependencies.androidX.coreKtx
+}

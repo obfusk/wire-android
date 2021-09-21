@@ -25,12 +25,11 @@ import com.waz.content.GlobalPreferences
 import com.waz.log.BasicLogging.LogTag.DerivedLogTag
 import com.waz.model.PushToken
 import com.waz.service.BackendConfig
-import com.wire.signals.Signal
 import com.waz.utils.wrappers.GoogleApi
+import com.wire.signals.Signal
 
-class GoogleApiImpl extends GoogleApi with DerivedLogTag {
-
-  override val isGooglePlayServicesAvailable = Signal[Boolean](false)
+class GoogleApiImpl extends GoogleApi {
+  override val isGooglePlayServicesAvailable: Signal[Boolean] = Signal(false)
 
   override def checkGooglePlayServicesAvailable(activity: Activity): Unit = {}
 
@@ -43,7 +42,7 @@ class GoogleApiImpl extends GoogleApi with DerivedLogTag {
   override def deleteAllPushTokens(): Unit = {}
 }
 
-object GoogleApiImpl {
+object GoogleApiImpl extends DerivedLogTag {
   private val instance = new GoogleApiImpl
 
   def apply(context: Context, beConfig: BackendConfig, prefs: GlobalPreferences): GoogleApiImpl = instance

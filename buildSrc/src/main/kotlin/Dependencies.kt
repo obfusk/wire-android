@@ -8,6 +8,7 @@ object Versions {
     const val ANDROID_CLIENT_MAJOR_VERSION = "3.72."
     const val COMPILE_SDK_VERSION = 30
     const val TARGET_SDK_VERSION = 30
+    const val TARGET_SDK_VERSION_FDROID = 29
     const val MIN_SDK_VERSION = 24
     const val BUILD_TOOLS_VERSION = "30.0.2"
     val SOURCE_COMPATIBILITY_VERSION = JavaVersion.VERSION_1_8
@@ -163,6 +164,7 @@ object ModuleDependencies {
     val storage = ":storage"
     val syncEngine = ":zmessaging"
     val commonTest = ":common-test"
+    val unifiedpushConnector = ":up-connector"
 }
 
 object TestDependencies {
